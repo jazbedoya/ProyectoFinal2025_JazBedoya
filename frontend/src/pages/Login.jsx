@@ -7,7 +7,6 @@ export default function Login() {
     const loginUser= async (e) =>{
         e.preventDefault();
 
-
     try{
         const resp = await fetch("http://127.0.0.1:5000/token",{ //await espera que el servidor responda y guarda respuesta en resp 
             method: "POST",
@@ -36,7 +35,6 @@ export default function Login() {
         alert(err.message)
       }
         
-
     };
 
     return(
@@ -69,4 +67,3 @@ export default function Login() {
     </div>
   );
 }
-    
