@@ -8,6 +8,8 @@ import Catalogo from "./pages/Catalogo";
 import DetalleGanado from "./pages/DetalleGanado";
 import Carrito from "./pages/Carrito";
 import Perfil from "./pages/Perfil";
+import EditarPerfil from "./pages/EditarPerfil";
+import PublicarGanado from "./pages/PublicarGanado";
 
 // Ruta protegida: solo deja entrar si hay un token válido
 const PrivateRoute = ({ children }) => {
@@ -31,6 +33,9 @@ export default function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/catalogo" element={<Catalogo />} />
           <Route path="/detalle/:id" element={<DetalleGanado />} />
+          <Route path="/editar-perfil" element={<EditarPerfil />} />
+          <Route path="/publicar" element={<PublicarGanado />} />
+
 
           {/* Rutas protegidas */}
           <Route

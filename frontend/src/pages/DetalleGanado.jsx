@@ -3,31 +3,35 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 export default function DetalleGanado() {
-  const { id } = useParams();
-  const [ganado, setGanado] = useState(null);
+  const { id } = useParams(); //obtener id de la url, el useParams sirve para obtener parametros de la url
+  const [ganado, setGanado] = useState(null); //esta en null porque todavia no cargo
 
+
+  //Trae del backend los detalles del ganado
   const cargarGanado = async () => {
     try {
-      const resp = await fetch(`http://127.0.0.1:5000/ganado/${id}`);
-      const data = await resp.json();
-      setGanado(data);
+      const resp = await fetch(`http://127.0.0.1:5000/ganado/${id}`); //fecth a la API usando el id
+      const data = await resp.json(); //Convierte respuesta en JSON
+      setGanado(data); //guarda los datos en ganado
     } catch (err) {
-      alert("Error al cargar el ganado");
+      alert("Error al cargar el ganado");  //si algo falla muestra mensaje
     }
   };
 
+
+   //envia una orden al backend para agregar ese lote al carrito
   const agregarAlCarrito = async () => {
     try {
-      const token = localStorage.getItem("jwt-token");
+      const token = localStorage.getItem("jwt-token"); //obtengo el token, revisa si usuario esta logueado
 
       const resp = await fetch("http://127.0.0.1:5000/carrito", {
-        method: "POST",
+        method: "POST", //envio la solicitud POST porque estoy agregando
         headers: {
           "Content-type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${token}`, //token del usuario
         },
         body: JSON.stringify({
-          ganado_id: ganado.id,
+          ganado_id: ganado.id, //id del ganado
           quantity: 1,
         }),
       });
@@ -40,6 +44,7 @@ export default function DetalleGanado() {
     }
   };
 
+   //para cargar datos al inicio, hace que cargarganado() se ejecute una sola vez
   useEffect(() => {
     cargarGanado();
   }, []);

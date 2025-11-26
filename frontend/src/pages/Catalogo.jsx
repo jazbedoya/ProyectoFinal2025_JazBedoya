@@ -1,11 +1,9 @@
-// src/pages/Catalogo.jsx
+
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 export default function Catalogo() {
-  // -----------------------------
-  // 1) ESTADOS DEL COMPONENTE
-  // -----------------------------
+  
 
   // Lista de lotes de ganado que viene del backend
   const [ganado, setGanado] = useState([]);
@@ -16,9 +14,8 @@ export default function Catalogo() {
   // Para guardar un mensaje de error si algo falla
   const [error, setError] = useState(null);
 
-  // -----------------------------------------
-  // 2) EFECTO: PEDIR LOS LOTES AL BACKEND
-  // -----------------------------------------
+  
+  // PEDIR LOS LOTES AL BACKEND
   useEffect(() => {
     // Función asíncrona para poder usar async/await
     const fetchGanado = async () => {
@@ -26,7 +23,7 @@ export default function Catalogo() {
         // Llamada a tu backend (Flask) en /ganado
         const resp = await fetch("http://127.0.0.1:5000/ganado");
 
-        // Si la respuesta NO es 200–299, lanzo un error
+        // Si la respuesta NO es 200–299 lanzo un error
         if (!resp.ok) {
           throw new Error("Error al cargar el catálogo");
         }
@@ -34,14 +31,12 @@ export default function Catalogo() {
         // Convierto la respuesta a JSON
         const data = await resp.json();
 
-        // Tu backend devuelve un array directamente,
-        // pero si algún día devolviera { ganado: [...] },
-        // esta línea sigue funcionando.
+        
         const lista = Array.isArray(data) ? data : data.ganado;
 
         console.log("Ganado cargado:", lista); // Para ver en consola qué llega
 
-        // Guardo la lista en el estado (si viene null/undefined, uso [])
+        // Guardo la lista en el estado 
         setGanado(lista || []);
       } catch (err) {
         console.error(err);
@@ -55,13 +50,12 @@ export default function Catalogo() {
     fetchGanado();
   }, []); // [] => se ejecuta una sola vez al montar el componente
 
-  // ----------------------------------------------------
-  // 3) VISTAS SEGÚN ESTADO (CARGANDO / ERROR / NORMAL)
-  // ----------------------------------------------------
+  
+  // VISTAS SEGÚN ESTADO (CARGANDO / ERROR / NORMAL)
+  
 
   if (loading) {
-    // Mientras se está cargando mostramos un texto simple.
-    // Podrías poner un spinner de Bootstrap si quieres.
+ 
     return <p>Cargando catálogo...</p>;
   }
 
@@ -74,19 +68,18 @@ export default function Catalogo() {
     );
   }
 
-  // --------------------------------
-  // 4) RENDER DEL CATÁLOGO
-  // --------------------------------
+
+  // RENDER DEL CATÁLOGO
+  
   return (
     <div>
       {/* Título principal */}
       <h2 className="mb-4">Catálogo de Lotes</h2>
 
-      {/* Grid de Bootstrap */}
+  
       <div className="row">
         {ganado.map((g) => {
-          // Aseguramos que la URL de la imagen sea válida (comience con http)
-          // Si no lo es, usamos una imagen de placeholder por defecto.
+        
           const imageUrl =
             g.image && g.image.startsWith("http")
               ? g.image
