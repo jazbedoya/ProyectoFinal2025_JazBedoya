@@ -10,6 +10,7 @@ import Carrito from "./pages/Carrito";
 import Perfil from "./pages/Perfil";
 import EditarPerfil from "./pages/EditarPerfil";
 import PublicarGanado from "./pages/PublicarGanado";
+import EditarGanado from "./pages/EditarGanado";
 
 
 // Ruta protegida: solo deja entrar si hay un token válido
@@ -37,10 +38,20 @@ export default function App() {
           <Route path="/editar-perfil" element={<EditarPerfil />} />
           <Route path="/publicar" element={<PublicarGanado />} />
           <Route path="/carrito" element={<Carrito />} />
+        
 
 
 
           {/* Rutas protegidas */}
+          <Route
+            path="/editar-ganado/:id"
+            element={
+              <PrivateRoute>
+                <EditarGanado />
+              </PrivateRoute>
+            }
+          />
+
           <Route
             path="/carrito"
             element={
