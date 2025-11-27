@@ -1,18 +1,20 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react"; //React necesario para crear componentes , useState permite cambiar datos que cambian
 import { Link } from "react-router-dom";
 
 export default function Perfil() {
+  //Estados de la pagina
   const [user, setUser] = useState(null);
   const [ganado, setGanado] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  //Ejecuta al cargar la pagina
   useEffect(() => {
-    const token = localStorage.getItem("jwt-token");
+    const token = localStorage.getItem("jwt-token"); //obtiene el JWT del localStore
 
     if (!token) {
-      alert("Debes iniciar sesión");
+      alert("Debes iniciar sesión"); //si es diferente al token debe iniciar sesion
       window.location.href = "/login";
-      return;
+      return; 
     }
 
     // Obtener usuario logueado
@@ -25,16 +27,18 @@ export default function Perfil() {
       .then((resp) => resp.json())
       .then((data) => {
         setUser(data);
-        return fetch(`http://127.0.0.1:5000/ganado?vendedor_id=${data.id}`);
+        return fetch(`http://127.0.0.1:5000/ganado?vendedor_id=${data.id}`); //Obtener el ganado del usuario,usa id del usuario para pedir a backend tdo su ganado
       })
       .then((resp) => resp.json())
       .then((data) => {
-        setGanado(Array.isArray(data) ? data : []);
+        setGanado(Array.isArray(data) ? data : []); //La respuesta se guarda en ganado
       })
       .catch(() => alert("Error obteniendo el perfil"))
       .finally(() => setLoading(false));
   }, []);
-
+ 
+ 
+  //De carga y error
   if (loading) return <h3 className="m-4">Cargando perfil...</h3>;
   if (!user) return <h3 className="m-4">No se pudo cargar el usuario</h3>;
 
@@ -106,6 +110,8 @@ export default function Perfil() {
     </div>
   );
 
+
+  //envia un DElete al backend para eliminar ese lote
   function eliminarGanado(id) {
     if (!confirm("¿Seguro que quieres eliminar este lote?")) return;
 

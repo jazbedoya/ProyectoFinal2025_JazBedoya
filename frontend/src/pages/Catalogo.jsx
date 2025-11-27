@@ -5,31 +5,28 @@ import { Link } from "react-router-dom";
 export default function Catalogo() {
   
 
-  // Lista de lotes de ganado que viene del backend
+  //lista de lotes de ganado que viene del backend
   const [ganado, setGanado] = useState([]);
-
   // Bandera para saber si estamos cargando
   const [loading, setLoading] = useState(true);
-
-  // Para guardar un mensaje de error si algo falla
+ // Para guardar un mensaje de error si algo falla
   const [error, setError] = useState(null);
 
   
-  // PEDIR LOS LOTES AL BACKEND
+  
   useEffect(() => {
     // Función asíncrona para poder usar async/await
     const fetchGanado = async () => {
       try {
-        // Llamada a tu backend (Flask) en /ganado
+        // Llamada a tu backend en ganado
         const resp = await fetch("http://127.0.0.1:5000/ganado");
 
-        // Si la respuesta NO es 200–299 lanzo un error
+        
         if (!resp.ok) {
           throw new Error("Error al cargar el catálogo");
         }
 
-        // Convierto la respuesta a JSON
-        const data = await resp.json();
+        const data = await resp.json(); //se convierte la respuesta en JSON
 
         
         const lista = Array.isArray(data) ? data : data.ganado;
@@ -42,7 +39,7 @@ export default function Catalogo() {
         console.error(err);
         setError(err.message);
       } finally {
-        // Siempre, haya éxito o error, dejamos de estar "cargando"
+        // Si todo sale bien se deja de estar cargando
         setLoading(false);
       }
     };

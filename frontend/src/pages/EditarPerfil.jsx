@@ -1,23 +1,25 @@
 import React, { useEffect, useState } from "react";
 
 export default function EditarPerfil() {
-  const [form, setForm] = useState({ name: "", email: "" });
-  const [loading, setLoading] = useState(true);
+  const [form, setForm] = useState({ name: "", email: "" }); //Guarda los datos editados
+  const [loading, setLoading] = useState(true); //indica si esta cargando los datos del usuario
 
   useEffect(() => {
-    const token = localStorage.getItem("jwt-token");
+    const token = localStorage.getItem("jwt-token"); //obtner el token del localStore
 
+
+    //hace una peticion para obtener datos del usuario actual
     fetch("http://127.0.0.1:5000/users/me", {
       headers: { "Authorization": "Bearer " + token },
     })
       .then(resp => resp.json())
       .then(data => {
-        setForm({ name: data.name, email: data.email });
+        setForm({ name: data.name, email: data.email }); // se recibe los datos y se cambia
       })
-      .finally(() => setLoading(false));
+      .finally(() => setLoading(false)); //y finalmente cambia loading a false
   }, []);
 
-  if (loading) return <h3 className="m-4">Cargando...</h3>;
+  if (loading) return <h3 className="m-4">Cargando...</h3>; //mientras loading sea True el formulario no se renderiza
 
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -25,13 +27,15 @@ export default function EditarPerfil() {
 
   function handleSubmit(e) {
     e.preventDefault();
-    const token = localStorage.getItem("jwt-token");
+    const token = localStorage.getItem("jwt-token"); //Obtengo nuevamente el token para autentificar peticion
 
+
+    //Enviar datos actualizados al backend
     fetch("http://127.0.0.1:5000/users/me", {
-      method: "PUT",
+      method: "PUT", //put p/ actualizar datos
       headers: {
         "Content-Type": "application/json",
-        "Authorization": "Bearer " + token,
+        "Authorization": "Bearer " + token, // incluye toquen para que backend permita los accesos
       },
       body: JSON.stringify(form),
     })

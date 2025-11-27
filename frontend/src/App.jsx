@@ -11,6 +11,7 @@ import Perfil from "./pages/Perfil";
 import EditarPerfil from "./pages/EditarPerfil";
 import PublicarGanado from "./pages/PublicarGanado";
 
+
 // Ruta protegida: solo deja entrar si hay un token válido
 const PrivateRoute = ({ children }) => {
   const token = localStorage.getItem("jwt-token");
@@ -35,6 +36,8 @@ export default function App() {
           <Route path="/detalle/:id" element={<DetalleGanado />} />
           <Route path="/editar-perfil" element={<EditarPerfil />} />
           <Route path="/publicar" element={<PublicarGanado />} />
+          <Route path="/carrito" element={<Carrito />} />
+
 
 
           {/* Rutas protegidas */}

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 
 export default function PublicarGanado() {
+  //Estado inicial del formulario
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -14,13 +15,16 @@ export default function PublicarGanado() {
     image: "",
   });
 
+   //Esta funcion actualiza los campos, name actualiza el campo y value lo que escribio
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
-
+ //Evita recargar la pagina
   function handleSubmit(e) {
     e.preventDefault();
+     
 
+    //Verificacion y validacion del token
     const token = localStorage.getItem("jwt-token");
     if (!token) {
       alert("Debes iniciar sesión");
@@ -41,7 +45,7 @@ export default function PublicarGanado() {
       })
       .then(() => {
         alert("Lote publicado correctamente");
-        window.location.href = "/perfil";
+        window.location.href = "/perfil"; //redirige a perfil
       })
       .catch(() => alert("No se pudo publicar el lote"));
   }
