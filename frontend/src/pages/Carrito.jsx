@@ -1,19 +1,20 @@
 import React, { useEffect, useState } from "react";
 
 export default function Carrito() {
-  const [carrito, setCarrito] = useState({ items: [], total: 0 });
-  const [qrPago, setQrPago] = useState(null);
-  const [procesando, setProcesando] = useState(false);
+  const [carrito, setCarrito] = useState({ items: [], total: 0 }); //guardo los productos que el backend devuleve
+  const [qrPago, setQrPago] = useState(null); //Guarda url devuelta por Cloudinary despues del checkout
+  const [procesando, setProcesando] = useState(false); //activa un loading caundo hace el pago
 
 
 
   useEffect(() => {
     cargarCarrito();
-  }, []);
+  }, []); //se jecuta una sola vez carga el carrito
 
   const cargarCarrito = () => {
     const token = localStorage.getItem("jwt-token");
-
+   
+    //llama al backend con autorizacion
     fetch("http://127.0.0.1:5000/carrito", {
       headers: { "Authorization": "Bearer " + token }
     })
@@ -22,10 +23,11 @@ export default function Carrito() {
   };
 
   const cambiarCantidad = (id, nuevaCantidad) => {
-    if (nuevaCantidad < 1) return;
+    if (nuevaCantidad < 1) return; //evita cantidades menores a 1
 
     const token = localStorage.getItem("jwt-token");
-
+    
+    //Luego hace un put al backend
     fetch(`http://127.0.0.1:5000/carrito/${id}`, {
       method: "PUT",
       headers: {
@@ -35,7 +37,7 @@ export default function Carrito() {
       body: JSON.stringify({ quantity: nuevaCantidad })
     })
       .then(resp => resp.json())
-      .then(() => cargarCarrito());
+      .then(() => cargarCarrito()); //al terminar recarga el carrito
   };
 
   const eliminarItem = (id) => {
@@ -46,19 +48,19 @@ export default function Carrito() {
       headers: { "Authorization": "Bearer " + token }
     })
       .then(resp => resp.json())
-      .then(() => cargarCarrito());
+      .then(() => cargarCarrito()); //una vez elimionado recarga el carrito
   };
 
-  // ---------------- API EXTERNA CLOUDINARY ----------------
+  // API EXTERNA CLOUDINARY
   const procesarPago = () => {
     const token = localStorage.getItem("jwt-token");
-    setProcesando(true);
+    setProcesando(true); //activa un procesando
 
     fetch("http://127.0.0.1:5000/orders/checkout", {
       method: "POST",
       headers: { "Authorization": "Bearer " + token }
     })
-      .then(resp => resp.json())
+      .then(resp => resp.json()) //recibe una respuesta
       .then(data => {
         setProcesando(false);
 
@@ -73,7 +75,7 @@ export default function Carrito() {
   return (
     <div className="container mt-4">
       <h2 className="fw-bold" style={{ color: "#0B7A35" }}>Mi Carrito</h2>
-
+  
       {carrito.items.length === 0 && !qrPago && (
         <div className="alert alert-info mt-3">
           Tu carrito está vacío. Ve al catálogo para agregar lotes.

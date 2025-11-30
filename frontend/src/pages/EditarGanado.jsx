@@ -20,7 +20,7 @@ export default function EditarGanado() {
 
   const [loading, setLoading] = useState(true);
 
-  // CARGAR DATOS DEL LOTE
+  // guardar los datos del lote
   useEffect(() => {
     const token = localStorage.getItem("jwt-token");
 
@@ -36,12 +36,12 @@ export default function EditarGanado() {
       .finally(() => setLoading(false));
   }, [id]);
 
-  // MANEJAR CAMBIOS EN INPUTS
+  // Mmanejar los camnios en inputs
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  // GUARDAR CAMBIOS
+  // guardar los cambios
   const handleSubmit = (e) => {
     e.preventDefault();
 
