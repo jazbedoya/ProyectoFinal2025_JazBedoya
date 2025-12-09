@@ -18,17 +18,13 @@ export default function EditarGanado() {
     image: ""
   });
 
+  const [imageFile, setImageFile] = useState(null); 
   const [loading, setLoading] = useState(true);
 
-  // guardar los datos del lote
   useEffect(() => {
     const token = localStorage.getItem("jwt-token");
 
-    fetch(`http://127.0.0.1:5000/ganado/${id}`, {
-      headers: {
-        "Authorization": "Bearer " + token
-      }
-    })
+    fetch(import.meta.env.VITE_BACKEND_URL + "/ganado/${id}")
       .then(resp => resp.json())
       .then(data => {
         setForm(data);
@@ -36,31 +32,52 @@ export default function EditarGanado() {
       .finally(() => setLoading(false));
   }, [id]);
 
-  // Mmanejar los camnios en inputs
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+  // PREVIEW
+  const handleImageChange = (e) => {
+    setImageFile(e.target.files[0]);
   };
 
-  // guardar los cambios
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  // SUBIR A CLOUDINARY
+  async function uploadToCloudinary() {
+    const token = localStorage.getItem("jwt-token");
+    const fd = new FormData();
+    fd.append("file", imageFile);
 
+    const resp = await fetch(import.meta.env.VITE_BACKEND_URL + "/upload-image", {
+      method: "POST",
+      headers: { Authorization: "Bearer " + token },
+      body: fd
+    });
+
+    const data = await resp.json();
+    return data.url;
+  }
+
+  // GUARDAR CAMBIOS
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     const token = localStorage.getItem("jwt-token");
 
-    fetch(`http://127.0.0.1:5000/ganado/${id}`, {
+    let finalImage = form.image;
+
+    // si el usuario sube una nueva imagen → subirla
+    if (imageFile) {
+      finalImage = await uploadToCloudinary();
+    }
+
+    const resp = await fetch(import.meta.env.VITE_BACKEND_URL + "/ganado/${id}", {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
         "Authorization": "Bearer " + token
       },
-      body: JSON.stringify(form)
-    })
-      .then(resp => {
-        if (!resp.ok) throw new Error("Error actualizando");
-        alert("Lote actualizado correctamente");
-        navigate("/perfil");
-      })
-      .catch(() => alert("No se pudo actualizar"));
+      body: JSON.stringify({ ...form, image: finalImage })
+    });
+
+    if (!resp.ok) return alert("Error actualizando");
+
+    alert("Lote actualizado correctamente");
+    navigate("/perfil");
   };
 
   if (loading) return <h3 className="m-4">Cargando...</h3>;
@@ -72,124 +89,50 @@ export default function EditarGanado() {
       </h2>
 
       <form className="card p-4 shadow mt-3" onSubmit={handleSubmit}>
-        
+
+        {/* ---------- CAMPOS NORMALES ---------- */}
+        {[
+          "title", "description", "price_per_head",
+          "breed", "category", "age", "kg",
+          "department", "city"
+        ].map((key) => (
+          <div className="mb-3" key={key}>
+            <label className="form-label">{key}</label>
+            <input
+              name={key}
+              className="form-control"
+              value={form[key]}
+              onChange={(e) => setForm({ ...form, [key]: e.target.value })}
+            />
+          </div>
+        ))}
+
+        {/* ---------- IMAGEN ACTUAL ---------- */}
         <div className="mb-3">
-          <label className="form-label">Título</label>
-          <input
-            type="text"
-            name="title"
-            className="form-control"
-            value={form.title}
-            onChange={handleChange}
-            required
+          <label className="form-label">Imagen actual</label>
+          <img
+            src={form.image}
+            alt="actual"
+            width="250"
+            className="img-thumbnail d-block mb-2"
           />
         </div>
 
+        {/* ---------- SUBIR NUEVA IMAGEN ---------- */}
         <div className="mb-3">
-          <label className="form-label">Descripción</label>
-          <textarea
-            name="description"
-            className="form-control"
-            rows="3"
-            value={form.description}
-            onChange={handleChange}
-          ></textarea>
+          <label className="form-label">Subir nueva imagen (opcional)</label>
+          <input type="file" className="form-control" onChange={handleImageChange} />
         </div>
 
-        <div className="row">
-          <div className="col-md-6 mb-3">
-            <label className="form-label">Precio por cabeza</label>
-            <input
-              type="number"
-              name="price_per_head"
-              className="form-control"
-              value={form.price_per_head}
-              onChange={handleChange}
-              required
-            />
-          </div>
-
-          <div className="col-md-6 mb-3">
-            <label className="form-label">Raza</label>
-            <input
-              type="text"
-              name="breed"
-              className="form-control"
-              value={form.breed}
-              onChange={handleChange}
-            />
-          </div>
-        </div>
-
-        <div className="row">
-          <div className="col-md-4 mb-3">
-            <label className="form-label">Categoría</label>
-            <input
-              type="text"
-              name="category"
-              className="form-control"
-              value={form.category}
-              onChange={handleChange}
-            />
-          </div>
-
-          <div className="col-md-4 mb-3">
-            <label className="form-label">Edad (meses)</label>
-            <input
-              type="number"
-              name="age"
-              className="form-control"
-              value={form.age}
-              onChange={handleChange}
-            />
-          </div>
-
-          <div className="col-md-4 mb-3">
-            <label className="form-label">Peso (kg)</label>
-            <input
-              type="number"
-              name="kg"
-              className="form-control"
-              value={form.kg}
-              onChange={handleChange}
-            />
-          </div>
-        </div>
-
-        <div className="row">
-          <div className="col-md-6 mb-3">
-            <label className="form-label">Departamento</label>
-            <input
-              type="text"
-              name="department"
-              className="form-control"
-              value={form.department}
-              onChange={handleChange}
-            />
-          </div>
-
-          <div className="col-md-6 mb-3">
-            <label className="form-label">Ciudad</label>
-            <input
-              type="text"
-              name="city"
-              className="form-control"
-              value={form.city}
-              onChange={handleChange}
-            />
-          </div>
-        </div>
-
-        <div className="mb-3">
-          <label className="form-label">Imagen (URL)</label>
-          <input
-            type="text"
-            name="image"
-            className="form-control"
-            value={form.image}
-            onChange={handleChange}
+        {/* Preview nueva imagen */}
+        {imageFile && (
+          <img
+            src={URL.createObjectURL(imageFile)}
+            alt="preview"
+            width="250"
+            className="img-thumbnail mb-3"
           />
-        </div>
+        )}
 
         <button className="btn btn-success w-100">
           Guardar Cambios

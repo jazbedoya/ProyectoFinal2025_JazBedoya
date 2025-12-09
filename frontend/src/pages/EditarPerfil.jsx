@@ -9,7 +9,7 @@ export default function EditarPerfil() {
 
 
     //hace una peticion para obtener datos del usuario actual
-    fetch("http://127.0.0.1:5000/users/me", {
+    fetch(import.meta.env.VITE_BACKEND_URL + "/users/me", {
       headers: { "Authorization": "Bearer " + token },
     })
       .then(resp => resp.json())
@@ -31,7 +31,7 @@ export default function EditarPerfil() {
 
 
     //Enviar datos actualizados al backend
-    fetch("http://127.0.0.1:5000/users/me", {
+    fetch(import.meta.env.VITE_BACKEND_URL + "/users/me", {
       method: "PUT", //put p/ actualizar datos
       headers: {
         "Content-Type": "application/json",

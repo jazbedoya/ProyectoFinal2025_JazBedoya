@@ -10,7 +10,7 @@ export default function DetalleGanado() {
   //Trae del backend los detalles del ganado
   const cargarGanado = async () => {
     try {
-      const resp = await fetch(`http://127.0.0.1:5000/ganado/${id}`); //fecth a la API usando el id
+      const resp = await fetch(import.meta.env.VITE_BACKEND_URL + "/ganado/${id}"); //fecth a la API usando el id
       const data = await resp.json(); //Convierte respuesta en JSON
       setGanado(data); //guarda los datos en ganado
     } catch (err) {
@@ -24,7 +24,7 @@ export default function DetalleGanado() {
     try {
       const token = localStorage.getItem("jwt-token"); //obtengo el token, revisa si usuario esta logueado
 
-      const resp = await fetch("http://127.0.0.1:5000/carrito", {
+      const resp = await fetch(import.meta.env.VITE_BACKEND_URL + "/carrito", {
         method: "POST", //envio la solicitud POST porque estoy agregando
         headers: {
           "Content-type": "application/json",

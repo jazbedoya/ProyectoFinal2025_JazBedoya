@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 
 export default function PublicarGanado() {
-  //Estado inicial del formulario
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -12,42 +11,55 @@ export default function PublicarGanado() {
     kg: "",
     department: "",
     city: "",
-    image: "",
   });
 
-   //Esta funcion actualiza los campos, name actualiza el campo y value lo que escribio
+  const [imageFile, setImageFile] = useState(null);
+  const [imageUrl, setImageUrl] = useState("");
+
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
- //Evita recargar la pagina
-  function handleSubmit(e) {
-    e.preventDefault();
-     
 
-    //Verificacion y validacion del token
+  async function uploadToCloudinary() {
     const token = localStorage.getItem("jwt-token");
-    if (!token) {
-      alert("Debes iniciar sesión");
-      return;
+
+    const fd = new FormData();
+    fd.append("file", imageFile);
+
+    const resp = await fetch(import.meta.env.VITE_BACKEND_URL + "/upload-image", {
+      method: "POST",
+      headers: { Authorization: "Bearer " + token },
+      body: fd,
+    });
+
+    const data = await resp.json();
+    return data.url;
+  }
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    const token = localStorage.getItem("jwt-token");
+
+    let img = imageUrl;
+
+    if (imageFile) {
+      img = await uploadToCloudinary();
+      setImageUrl(img); 
     }
 
-    fetch("http://127.0.0.1:5000/ganado", {
+    const resp = await fetch(import.meta.env.VITE_BACKEND_URL + "/ganado", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: "Bearer " + token,
       },
-      body: JSON.stringify(form),
-    })
-      .then((resp) => {
-        if (!resp.ok) throw new Error("Error al publicar");
-        return resp.json();
-      })
-      .then(() => {
-        alert("Lote publicado correctamente");
-        window.location.href = "/perfil"; //redirige a perfil
-      })
-      .catch(() => alert("No se pudo publicar el lote"));
+      body: JSON.stringify({ ...form, image: img }),
+    });
+
+    if (!resp.ok) return alert("Error al publicar");
+
+    alert("Lote publicado correctamente!");
+    window.location.href = "/perfil";
   }
 
   return (
@@ -56,114 +68,41 @@ export default function PublicarGanado() {
 
       <form className="card p-4 shadow mt-3" onSubmit={handleSubmit}>
 
+        {/* CAMPOS NORMALES */}
+        {Object.keys(form).map((key) => (
+          <div className="mb-3" key={key}>
+            <label className="form-label">{key}</label>
+            <input
+              className="form-control"
+              name={key}
+              onChange={handleChange}
+              required={key === "title" || key === "price_per_head"}
+            />
+          </div>
+        ))}
+
+        {/* SUBIR IMAGEN */}
         <div className="mb-3">
-          <label className="form-label">Título</label>
+          <label className="form-label">Imagen del lote</label>
           <input
-            name="title"
+            type="file"
+            accept="image/*"
             className="form-control"
-            value={form.title}
-            onChange={handleChange}
-            required
+            onChange={(e) => setImageFile(e.target.files[0])}
           />
         </div>
 
-        <div className="mb-3">
-          <label className="form-label">Descripción</label>
-          <textarea
-            name="description"
-            className="form-control"
-            value={form.description}
-            onChange={handleChange}
+        {/* PREVISUALIZACIÓN */}
+        {imageFile && (
+          <img
+            src={URL.createObjectURL(imageFile)}
+            alt="preview"
+            className="img-thumbnail mb-3"
+            width="250"
           />
-        </div>
+        )}
 
-        <div className="mb-3">
-          <label className="form-label">Precio por cabeza (Gs)</label>
-          <input
-            type="number"
-            name="price_per_head"
-            className="form-control"
-            value={form.price_per_head}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <div className="mb-3">
-          <label className="form-label">Raza</label>
-          <input
-            name="breed"
-            className="form-control"
-            value={form.breed}
-            onChange={handleChange}
-          />
-        </div>
-
-        <div className="mb-3">
-          <label className="form-label">Categoría</label>
-          <input
-            name="category"
-            className="form-control"
-            value={form.category}
-            onChange={handleChange}
-          />
-        </div>
-
-        <div className="mb-3">
-          <label className="form-label">Edad (meses)</label>
-          <input
-            type="number"
-            name="age"
-            className="form-control"
-            value={form.age}
-            onChange={handleChange}
-          />
-        </div>
-
-        <div className="mb-3">
-          <label className="form-label">Peso total del lote (kg)</label>
-          <input
-            type="number"
-            name="kg"
-            className="form-control"
-            value={form.kg}
-            onChange={handleChange}
-          />
-        </div>
-
-        <div className="mb-3">
-          <label className="form-label">Departamento</label>
-          <input
-            name="department"
-            className="form-control"
-            value={form.department}
-            onChange={handleChange}
-          />
-        </div>
-
-        <div className="mb-3">
-          <label className="form-label">Ciudad</label>
-          <input
-            name="city"
-            className="form-control"
-            value={form.city}
-            onChange={handleChange}
-          />
-        </div>
-
-        <div className="mb-3">
-          <label className="form-label">URL de imagen</label>
-          <input
-            name="image"
-            className="form-control"
-            value={form.image}
-            onChange={handleChange}
-          />
-        </div>
-
-        <button className="btn btn-success" type="submit">
-          Publicar lote
-        </button>
+        <button className="btn btn-success w-100">Publicar lote</button>
       </form>
     </div>
   );

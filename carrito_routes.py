@@ -46,6 +46,31 @@ def register_carrito_routes(app):
         db.session.commit()
 
         return jsonify(item.serialize()), 201
+    
+
+    @app.route("/carrito/<int:item_id>", methods=["PUT"])
+    @jwt_required()
+    def actualizar_cantidad(item_id):  # Actualiza la cantidad de un artículo del carrito
+        item = ArticuloDelCarrito.query.get(item_id)
+
+        if not item:
+            return jsonify({"msg": "No existe"}), 404
+
+        # Verificar que el item pertenece al usuario logueado
+        if item.user_id != int(get_jwt_identity()):
+            return jsonify({"msg": "No autorizado"}), 403
+
+        data = request.get_json()
+        nueva_cantidad = data.get("quantity")
+
+        if nueva_cantidad is None or nueva_cantidad < 1:
+            return jsonify({"msg": "Cantidad inválida"}), 400
+
+        item.quantity = nueva_cantidad
+        db.session.commit()
+
+        return jsonify(item.serialize()), 200
+
 
 
     @app.route("/carrito/<int:item_id>", methods=["DELETE"])

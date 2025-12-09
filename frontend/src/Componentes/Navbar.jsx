@@ -14,11 +14,17 @@ const Navbar = () => {
   return (
     <nav
       className="navbar navbar-expand-lg shadow-sm px-4"
-      style={{ backgroundColor: "#E8F5E9", position: "sticky", top: 0, zIndex: 1000 }}
+      style={{
+        background: "linear-gradient(90deg, #dcebdc, #f3efe5)", // degradado verde-marrón suave
+        borderBottom: "3px solid #8b6f47",
+        position: "sticky",
+        top: 0,
+        zIndex: 1000
+      }}
     >
       <div className="container-fluid">
 
-        {/* LOGO + TEXT */}
+        {/* LOGO */}
         <span
           className="navbar-brand d-flex align-items-center"
           style={{ cursor: "pointer" }}
@@ -28,18 +34,25 @@ const Navbar = () => {
             src="/logo.png"
             alt="GanadoPY"
             style={{
-              height: "40px",
-              width: "40px",
+              height: "42px",
+              width: "42px",
               marginRight: "10px",
             }}
           />
 
-          <span style={{ fontWeight: "bold", fontSize: "1.3rem", color: "#136a31" }}>
+          <span
+            style={{
+              fontWeight: "800",
+              fontSize: "1.35rem",
+              color: "#0b5f2a",
+              letterSpacing: "1px"
+            }}
+          >
             GanadoPY
           </span>
         </span>
 
-        {/* HAMBURGUER MOBILE */}
+        {/* BOTÓN MOBILE */}
         <button
           className="navbar-toggler"
           type="button"
@@ -49,12 +62,11 @@ const Navbar = () => {
           <span className="navbar-toggler-icon"></span>
         </button>
 
-        {/* NAV LINKS */}
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav me-auto">
 
             <li className="nav-item">
-              <Link className="nav-link nav-link-hover" to="/catalogo">
+              <Link className="nav-link nav-hover" to="/catalogo">
                 Catálogo
               </Link>
             </li>
@@ -62,13 +74,13 @@ const Navbar = () => {
             {token && (
               <>
                 <li className="nav-item">
-                  <Link className="nav-link nav-link-hover" to="/carrito">
+                  <Link className="nav-link nav-hover" to="/carrito">
                     Carrito
                   </Link>
                 </li>
 
                 <li className="nav-item">
-                  <Link className="nav-link nav-link-hover" to="/perfil">
+                  <Link className="nav-link nav-hover" to="/perfil">
                     Mi perfil
                   </Link>
                 </li>
@@ -76,9 +88,8 @@ const Navbar = () => {
             )}
           </ul>
 
-          {/* RIGHT SIDE BUTTONS */}
+          {/* BOTONES DERECHA */}
           <div className="d-flex">
-
             {!token && (
               <>
                 <Link className="btn btn-outline-success me-2" to="/login">
@@ -92,10 +103,7 @@ const Navbar = () => {
             )}
 
             {token && (
-              <button
-                className="btn btn-danger"
-                onClick={logout}
-              >
+              <button className="btn btn-danger" onClick={logout}>
                 Cerrar sesión
               </button>
             )}
@@ -103,21 +111,17 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Custom CSS */}
+      {/* ESTILOS EXTRA */}
       <style>{`
         .nav-link {
-          font-weight: 500;
-          color: #333 !important;
-          transition: 0.2s ease-in-out;
+          font-weight: 600;
+          color: #3b3b3b !important;
+          transition: 0.25s ease-in-out;
         }
 
-        .nav-link-hover:hover {
+        .nav-hover:hover {
           color: #0b7a35 !important;
-          transform: translateY(-1px);
-        }
-
-        .navbar-brand span:hover {
-          opacity: 0.85;
+          transform: translateY(-2px);
         }
       `}</style>
     </nav>

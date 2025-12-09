@@ -40,3 +40,9 @@
 .read-the-docs {
   color: #888;
 }
+
+
+body {
+  background: #f3f0e9;
+  background-image: url("https://www.transparenttextures.com/patterns/paper-fibers.png");
+}

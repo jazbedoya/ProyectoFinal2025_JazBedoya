@@ -1,7 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
 
 db = SQLAlchemy()
+
 
 class User(db.Model):
     __tablename__ = "users"
@@ -23,16 +23,17 @@ class User(db.Model):
         }
 
 
+
 class Ganado(db.Model):
     __tablename__ = "ganado"
 
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(150), nullable=False) #ej: lote de 20 novillos
+    title = db.Column(db.String(150), nullable=False)
     description = db.Column(db.Text)
     price_per_head = db.Column(db.Float, nullable=False)
 
-    breed = db.Column(db.String(100)) #raza
-    category = db.Column(db.String(100)) # reproductor, engorde
+    breed = db.Column(db.String(100))
+    category = db.Column(db.String(100))
     age = db.Column(db.Integer)
     kg = db.Column(db.Float)
 
@@ -41,9 +42,7 @@ class Ganado(db.Model):
     image = db.Column(db.String(250))
 
     is_active = db.Column(db.Boolean, default=True)
-    
 
-    #Clave Foranea que apunta al vendedor (tabla users)
     vendedor_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
 
     def serialize(self):
@@ -95,12 +94,14 @@ class Order(db.Model):
     __tablename__ = "orders"
 
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
-    total_amount = db.Column(db.Float, nullable=False, default=0.0)
+    user_id = db.Column(db.Integer, nullable=False)
+    total_amount = db.Column(db.Float, nullable=False)
     status = db.Column(db.String(20), default="pending")
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    user = db.relationship("User", backref="orders", lazy=True)
+    # URL del QR alojado en Cloudinary
+    qr_url = db.Column(db.String(300))
+
+    items = db.relationship("OrderItem", backref="order", lazy=True)
 
     def serialize(self):
         return {
@@ -108,9 +109,10 @@ class Order(db.Model):
             "user_id": self.user_id,
             "total_amount": self.total_amount,
             "status": self.status,
-            "created_at": self.created_at.isoformat(),
+            "qr_url": self.qr_url,
             "items": [item.serialize() for item in self.items]
         }
+
 
 
 class OrderItem(db.Model):
@@ -122,7 +124,6 @@ class OrderItem(db.Model):
     quantity = db.Column(db.Integer, nullable=False)
     price_per_head = db.Column(db.Float, nullable=False)
 
-    order = db.relationship("Order", backref="items", lazy=True)
     ganado = db.relationship("Ganado", lazy=True)
 
     def serialize(self):
