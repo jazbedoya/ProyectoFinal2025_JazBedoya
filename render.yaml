@@ -1,11 +1,17 @@
 services:
   - type: web
-    name: ganado-backend
-    env: python
+    name: GanadoPy
+    runtime: python3.12
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn app:app
     envVars:
-      - key: FLASK_ENV
-        value: production
-      - key: CLOUDINARY_URL
-        value: cloudinary://TU_API_KEY:TU_API_SECRET@TU_CLOUD_NAME
+      - key: DATABASE_URL
+        sync: false
+      - key: CLOUD_API_KEY
+        sync: false
+      - key: CLOUD_API_SECRET
+        sync: false
+      - key: CLOUD_NAME
+        sync: false
+      - key: JWT_SECRET_KEY
+        sync: false
