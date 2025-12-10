@@ -15,15 +15,14 @@ app = Flask(__name__)
 # ---------------------------------------------------
 # CONFIG DB (SQLite local o PostgreSQL en Render)
 # ---------------------------------------------------
-DATABASE_URL = os.getenv("DATABASE_URL")  # Render usa DATABASE_URL
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 if DATABASE_URL:
-    # Render usa postgres:// pero SQLAlchemy necesita postgresql://
-    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://")
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+psycopg://")
     app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
 else:
-    # Local
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///test.db"
+
 
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
