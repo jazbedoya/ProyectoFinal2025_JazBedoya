@@ -12,28 +12,40 @@ import os
 
 app = Flask(__name__)
 
+
 # ---------------------------------------------------
-# CONFIG DB (SQLite local o PostgreSQL en Render)
+# CONFIG DB (SQLite local / PostgreSQL en Render)
 # ---------------------------------------------------
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 if DATABASE_URL:
-    # Render usa "postgresql://" y SQLAlchemy requiere el driver explicitamente
-    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+psycopg2://")
+    # Render envía así: postgresql://usuario:pass@host/db
+    # SQLAlchemy exige driver: postgresql+psycopg2://
+    if DATABASE_URL.startswith("postgresql://"):
+        DATABASE_URL = DATABASE_URL.replace(
+            "postgresql://", 
+            "postgresql+psycopg2://", 
+            1
+        )
     app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
 else:
-    # Solo para desarrollo local
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///test.db"
+
 
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-# SECRET JWT
+
+# ---------------------------------------------------
+# JWT SECRET
+# ---------------------------------------------------
 app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY", "4geeks")
+
 
 # ---------------------------------------------------
 # CORS
 # ---------------------------------------------------
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
+
 
 # ---------------------------------------------------
 # CLOUDINARY CONFIG
@@ -44,25 +56,29 @@ cloudinary.config(
     api_secret=os.getenv("CLOUD_API_SECRET")
 )
 
+
 # ---------------------------------------------------
 # Inicializar extensiones
 # ---------------------------------------------------
 db.init_app(app)
 jwt = JWTManager(app)
 
+
+# ---------------------------------------------------
 # Registrar rutas
+# ---------------------------------------------------
 register_user_routes(app)
 register_ganado_routes(app)
 register_carrito_routes(app)
 register_order_routes(app)
 
+
 # ---------------------------------------------------
-# INICIO DEL SERVIDOR
+# INICIO SERVIDOR LOCAL / PRODUCCIÓN
 # ---------------------------------------------------
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
 
-    # Render asigna el puerto automáticamente
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
