@@ -11,15 +11,19 @@ greenlet==3.0.3
 itsdangerous==2.2.0
 Jinja2==3.1.4
 MarkupSafe==2.1.5
-pillow==10.2.0
+
+# ← ESTA ES LA VERSION CORRECTA PARA RENDER
+Pillow==9.5.0
+
 PyJWT==2.8.0
 qrcode==7.4.2
 six==1.16.0
 SQLAlchemy==2.0.23
-typing_extensions==4.12.2
-urllib3==2.2.1
+typing_extensions==4.8.0
+urllib3==2.1.0
 Werkzeug==3.0.1
 
-gunicorn==23.0.0
-
+# Driver PostgreSQL correcto para Render y Python 3.10
 psycopg2-binary==2.9.9
+
+gunicorn==23.0.0
