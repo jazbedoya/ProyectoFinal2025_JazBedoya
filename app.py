@@ -18,11 +18,12 @@ app = Flask(__name__)
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 if DATABASE_URL:
-    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+psycopg://")
+    # Render usa "postgresql://" y SQLAlchemy requiere el driver explicitamente
+    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+psycopg2://")
     app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
 else:
+    # Solo para desarrollo local
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///test.db"
-
 
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
@@ -35,12 +36,12 @@ app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY", "4geeks")
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
 # ---------------------------------------------------
-# CLOUDINARY
+# CLOUDINARY CONFIG
 # ---------------------------------------------------
 cloudinary.config(
-    cloud_name=os.getenv("CLOUD_NAME", "dk41nda4d"),
-    api_key=os.getenv("CLOUD_API_KEY", "139628881353826"),
-    api_secret=os.getenv("CLOUD_API_SECRET", "Yao5q36MCVl5MieO7dq_-FNDelU")
+    cloud_name=os.getenv("CLOUD_NAME"),
+    api_key=os.getenv("CLOUD_API_KEY"),
+    api_secret=os.getenv("CLOUD_API_SECRET")
 )
 
 # ---------------------------------------------------
@@ -62,6 +63,6 @@ if __name__ == "__main__":
     with app.app_context():
         db.create_all()
 
-    # Render asigna el puerto
+    # Render asigna el puerto automáticamente
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
