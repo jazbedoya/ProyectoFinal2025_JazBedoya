@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: ganado-backend
+    env: python
+    region: frankfurt
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "gunicorn app:app"
+    runtime: python
+    pythonVersion: 3.11
+    envVars:
+      - key: DATABASE_URL
+        fromService:
+          name: ganado-db
+          property: connectionString
+      - key: JWT_SECRET_KEY
+        value: "mi_clave_segura_123"
+      - key: CLOUD_NAME
+        sync: false
+      - key: CLOUD_API_KEY
+        sync: false
+      - key: CLOUD_API_SECRET
+        sync: false
+
+  - type: web
+    name: ganado-frontend
+    env: static
+    buildCommand: "npm install && npm run build"
+    staticPublishPath: "dist"
+
+databases:
+  - name: ganado-db
+    region: frankfurt
