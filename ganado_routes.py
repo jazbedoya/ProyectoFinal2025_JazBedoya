@@ -3,11 +3,10 @@ from flask import request, jsonify
 import cloudinary.uploader
 from models import db, Ganado
 
-def register_ganado_routes(app):  # Registra todas las rutas relacionada con ganado
+def register_ganado_routes(app):
 
     @app.route("/ganado", methods=["GET"])
-    def listar_ganado():   # Devuelve todos los lotes de ganado o solo los de un vendedor
-
+    def listar_ganado():
         vendedor_id = request.args.get("vendedor_id", None)
 
         if vendedor_id:
@@ -19,9 +18,8 @@ def register_ganado_routes(app):  # Registra todas las rutas relacionada con gan
             ganado = Ganado.query.filter_by(is_active=True).all()
 
         return jsonify([g.serialize() for g in ganado]), 200
-    
 
-    # PRIMER ENDPOINT /upload-image ✔
+
     @app.route("/upload-image", methods=["POST"], endpoint="upload_image")
     @jwt_required()
     def upload_image():
@@ -41,10 +39,9 @@ def register_ganado_routes(app):  # Registra todas las rutas relacionada con gan
 
     @app.route("/ganado/<int:id>", methods=["GET"])
     def obtener_ganado(id):
-
         g = Ganado.query.get(id)
         if not g or not g.is_active:
-            return jsonify({"msg": "Ganado no encontrado"})
+            return jsonify({"msg": "Ganado no encontrado"}), 404
         
         return jsonify(g.serialize()), 200
 
@@ -52,38 +49,40 @@ def register_ganado_routes(app):  # Registra todas las rutas relacionada con gan
     @app.route("/ganado", methods=["POST"])
     @jwt_required()
     def crear_ganado():
-        data = request.get_json()
+        data = request.get_json(silent=True) or {}
         vendedor_id = int(get_jwt_identity())
 
-        imagen = data.get("image")
-        if not imagen:
-            imagen = "https://res.cloudinary.com/demo/image/upload/default_cow.jpg"
+        imagen = data.get("image") or "https://res.cloudinary.com/demo/image/upload/default_cow.jpg"
 
-        nuevo = Ganado(
-            title=data["title"],
-            description=data.get("description"),
-            price_per_head=data["price_per_head"],
-            breed=data.get("breed"),
-            category=data.get("category"),
-            age=data.get("age"),
-            kg=data.get("kg"),
-            department=data.get("department"),
-            city=data.get("city"),
-            image=imagen,
-            vendedor_id=vendedor_id
-        )
+        try:
+            nuevo = Ganado(
+                title=data.get("title"),
+                description=data.get("description"),
+                price_per_head=int(data.get("price_per_head", 0)),
+                breed=data.get("breed"),
+                category=data.get("category"),
+                age=int(data.get("age", 0)) if data.get("age") else None,
+                kg=int(data.get("kg", 0)) if data.get("kg") else None,
+                department=data.get("department"),
+                city=data.get("city"),
+                image=imagen,
+                vendedor_id=vendedor_id
+            )
 
-        db.session.add(nuevo)
-        db.session.commit()
+            db.session.add(nuevo)
+            db.session.commit()
 
-        return jsonify(nuevo.serialize()), 201
+            return jsonify(nuevo.serialize()), 201
+
+        except Exception as e:
+            print("ERROR CREAR GANADO:", e)
+            return jsonify({"error": str(e)}), 500
 
 
     @app.route("/ganado/<int:id>", methods=["PUT"])
     @jwt_required()
     def editar_ganado(id):
-        
-        data = request.get_json()
+        data = request.get_json(silent=True) or {}
         g = Ganado.query.get(id)
 
         if not g:
@@ -103,7 +102,6 @@ def register_ganado_routes(app):  # Registra todas las rutas relacionada con gan
     @app.route("/ganado/<int:id>", methods=["DELETE"])
     @jwt_required()
     def eliminar_ganado(id):
-
         g = Ganado.query.get(id)
         if not g:
             return jsonify({"msg": "Ganado no existe"}), 404
@@ -120,11 +118,9 @@ def register_ganado_routes(app):  # Registra todas las rutas relacionada con gan
         return jsonify({"mensaje": "Ganado eliminado"}), 200
 
 
-    # SEGUNDO /upload-image (CORREGIDO, AHORA NO CHOCA) ✔
     @app.route("/upload-image", methods=["POST"], endpoint="upload_image_v2")
     @jwt_required()
     def upload_image_v2():
-
         if "file" not in request.files:
             return jsonify({"msg": "No file provided"}), 400
 
