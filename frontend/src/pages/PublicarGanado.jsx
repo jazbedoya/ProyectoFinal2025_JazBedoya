@@ -14,37 +14,82 @@ export default function PublicarGanado() {
   });
 
   const [imageFile, setImageFile] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
 
-  async function handleSubmit(e) {
-    e.preventDefault();
-    const token = localStorage.getItem("jwt-token");
-
+  // 👉 SUBIR IMAGEN
+  async function uploadImage(token) {
     const fd = new FormData();
+    fd.append("file", imageFile);
 
-    Object.keys(form).forEach((key) => {
-      fd.append(key, form[key]);
-    });
+    const resp = await fetch(
+      import.meta.env.VITE_BACKEND_URL + "/upload-image",
+      {
+        method: "POST",
+        headers: {
+          Authorization: "Bearer " + token,
+        },
+        body: fd,
+      }
+    );
 
-    if (imageFile) {
-      fd.append("image", imageFile);
+    if (!resp.ok) {
+      throw new Error("Error al subir imagen");
     }
 
-    const resp = await fetch(import.meta.env.VITE_BACKEND_URL + "/ganado", {
-      method: "POST",
-      headers: {
-        Authorization: "Bearer " + token,
-      },
-      body: fd,
-    });
+    const data = await resp.json();
+    return data.url;
+  }
 
-    if (!resp.ok) return alert("Error al publicar");
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setLoading(true);
 
-    alert("Lote publicado correctamente!");
-    window.location.href = "/perfil";
+    try {
+      const token = localStorage.getItem("jwt-token");
+
+      let imageUrl = null;
+
+      if (imageFile) {
+        imageUrl = await uploadImage(token);
+      }
+
+      const payload = {
+        ...form,
+        price_per_head: Number(form.price_per_head),
+        age: form.age ? Number(form.age) : null,
+        kg: form.kg ? Number(form.kg) : null,
+        image: imageUrl,
+      };
+
+      const resp = await fetch(
+        import.meta.env.VITE_BACKEND_URL + "/ganado",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + token,
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      if (!resp.ok) {
+        const err = await resp.json();
+        alert(err.msg || "Error al publicar");
+        return;
+      }
+
+      alert("Lote publicado correctamente!");
+      window.location.href = "/perfil";
+    } catch (err) {
+      alert("Error al publicar el lote");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -52,13 +97,13 @@ export default function PublicarGanado() {
       <h2>Publicar nuevo lote</h2>
 
       <form className="card p-4 shadow mt-3" onSubmit={handleSubmit}>
-
         {Object.keys(form).map((key) => (
           <div className="mb-3" key={key}>
             <label className="form-label">{key}</label>
             <input
               className="form-control"
               name={key}
+              value={form[key]}
               onChange={handleChange}
               required={key === "title" || key === "price_per_head"}
             />
@@ -84,7 +129,9 @@ export default function PublicarGanado() {
           />
         )}
 
-        <button className="btn btn-success w-100">Publicar lote</button>
+        <button className="btn btn-success w-100" disabled={loading}>
+          {loading ? "Publicando..." : "Publicar lote"}
+        </button>
       </form>
     </div>
   );
