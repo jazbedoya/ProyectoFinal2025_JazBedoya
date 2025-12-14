@@ -14,46 +14,31 @@ export default function PublicarGanado() {
   });
 
   const [imageFile, setImageFile] = useState(null);
-  const [imageUrl, setImageUrl] = useState("");
 
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
-  }
-
-  async function uploadToCloudinary() {
-    const token = localStorage.getItem("jwt-token");
-
-    const fd = new FormData();
-    fd.append("file", imageFile);
-
-    const resp = await fetch(import.meta.env.VITE_BACKEND_URL + "/upload-image", {
-      method: "POST",
-      headers: { Authorization: "Bearer " + token },
-      body: fd,
-    });
-
-    const data = await resp.json();
-    return data.url;
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
     const token = localStorage.getItem("jwt-token");
 
-    let img = imageUrl;
+    const fd = new FormData();
+
+    Object.keys(form).forEach((key) => {
+      fd.append(key, form[key]);
+    });
 
     if (imageFile) {
-      img = await uploadToCloudinary();
-      setImageUrl(img); 
+      fd.append("image", imageFile);
     }
 
     const resp = await fetch(import.meta.env.VITE_BACKEND_URL + "/ganado", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
         Authorization: "Bearer " + token,
       },
-      body: JSON.stringify({ ...form, image: img }),
+      body: fd,
     });
 
     if (!resp.ok) return alert("Error al publicar");
@@ -68,7 +53,6 @@ export default function PublicarGanado() {
 
       <form className="card p-4 shadow mt-3" onSubmit={handleSubmit}>
 
-        {/* CAMPOS NORMALES */}
         {Object.keys(form).map((key) => (
           <div className="mb-3" key={key}>
             <label className="form-label">{key}</label>
@@ -81,7 +65,6 @@ export default function PublicarGanado() {
           </div>
         ))}
 
-        {/* SUBIR IMAGEN */}
         <div className="mb-3">
           <label className="form-label">Imagen del lote</label>
           <input
@@ -92,7 +75,6 @@ export default function PublicarGanado() {
           />
         </div>
 
-        {/* PREVISUALIZACIÓN */}
         {imageFile && (
           <img
             src={URL.createObjectURL(imageFile)}
