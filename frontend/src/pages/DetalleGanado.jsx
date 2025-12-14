@@ -1,38 +1,38 @@
-//DetalleGanado.jsx
+// DetalleGanado.jsx
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 export default function DetalleGanado() {
-  const { id } = useParams(); //obtener id de la url, el useParams sirve para obtener parametros de la url
-  const [ganado, setGanado] = useState(null); //esta en null porque todavia no cargo
+  const { id } = useParams();
+  const [ganado, setGanado] = useState(null);
 
-
-  //Trae del backend los detalles del ganado
+  // Trae del backend los detalles del ganado
   const cargarGanado = async () => {
     try {
-       fetch(`${import.meta.env.VITE_BACKEND_URL}/ganado`);
-    //fecth a la API usando el id
-      const data = await resp.json(); //Convierte respuesta en JSON
-      setGanado(data); //guarda los datos en ganado
+      const resp = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/ganado/${id}`
+      );
+
+      const data = await resp.json();
+      setGanado(data);
     } catch (err) {
-      alert("Error al cargar el ganado");  //si algo falla muestra mensaje
+      alert("Error al cargar el ganado");
     }
   };
 
-
-   //envia una orden al backend para agregar ese lote al carrito
+  // envia una orden al backend para agregar ese lote al carrito
   const agregarAlCarrito = async () => {
     try {
-      const token = localStorage.getItem("jwt-token"); //obtengo el token, revisa si usuario esta logueado
+      const token = localStorage.getItem("jwt-token");
 
       const resp = await fetch(import.meta.env.VITE_BACKEND_URL + "/carrito", {
-        method: "POST", //envio la solicitud POST porque estoy agregando
+        method: "POST",
         headers: {
           "Content-type": "application/json",
-          Authorization: `Bearer ${token}`, //token del usuario
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          ganado_id: ganado.id, //id del ganado
+          ganado_id: ganado.id,
           quantity: 1,
         }),
       });
@@ -45,17 +45,21 @@ export default function DetalleGanado() {
     }
   };
 
-   //para cargar datos al inicio, hace que cargarganado() se ejecute una sola vez
+  // para cargar datos al inicio
   useEffect(() => {
     cargarGanado();
-  }, []);
+  }, [id]);
 
   if (!ganado) return <p>Cargando...</p>;
 
   return (
     <div className="row mt-4">
       <div className="col-md-6">
-        <img src={ganado.image} alt="foto" className="img-fluid rounded shadow" />
+        <img
+          src={ganado.image}
+          alt="foto"
+          className="img-fluid rounded shadow"
+        />
       </div>
 
       <div className="col-md-6">
@@ -63,14 +67,27 @@ export default function DetalleGanado() {
         <p className="text-muted">{ganado.description}</p>
 
         <ul className="list-group">
-          <li className="list-group-item"><strong>Raza:</strong> {ganado.breed}</li>
-          <li className="list-group-item"><strong>Edad:</strong> {ganado.age} meses</li>
-          <li className="list-group-item"><strong>Peso:</strong> {ganado.kg} kg</li>
-          <li className="list-group-item"><strong>Precio por cabeza:</strong> ${ganado.price_per_head}</li>
-          <li className="list-group-item"><strong>Ubicación:</strong> {ganado.city}, {ganado.department}</li>
+          <li className="list-group-item">
+            <strong>Raza:</strong> {ganado.breed}
+          </li>
+          <li className="list-group-item">
+            <strong>Edad:</strong> {ganado.age} meses
+          </li>
+          <li className="list-group-item">
+            <strong>Peso:</strong> {ganado.kg} kg
+          </li>
+          <li className="list-group-item">
+            <strong>Precio por cabeza:</strong> ${ganado.price_per_head}
+          </li>
+          <li className="list-group-item">
+            <strong>Ubicación:</strong> {ganado.city}, {ganado.department}
+          </li>
         </ul>
 
-        <button className="btn btn-success w-100 mt-3" onClick={agregarAlCarrito}>
+        <button
+          className="btn btn-success w-100 mt-3"
+          onClick={agregarAlCarrito}
+        >
           Agregar al carrito
         </button>
       </div>
